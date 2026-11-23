@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Local runs
+web/_captures/
+_captures/
+*.log
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Data and checkpoints (keep only the exported web model)
+*.ckpt
+checkpoint_*.pt
+model_best.pt
+latex_data/
+synth/
+font_test/

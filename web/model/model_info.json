@@ -1,0 +1,31 @@
+{
+ "config": {
+  "preprocess": "aspect",
+  "img_height": 96,
+  "max_width": 768,
+  "square_size": 224,
+  "encoder_block": 3,
+  "pos": "2d",
+  "coverage": true,
+  "embed_size": 256,
+  "hidden_size": 512,
+  "num_layers": 4
+ },
+ "vocab_size": 1223,
+ "metrics": {
+  "test_em_full": 34.8430709802028,
+  "test_img_full": 62.39771270827171,
+  "test_bleu_full": 82.58172178053361,
+  "test_compile_full": 91.9169483341381,
+  "n_test": 10355,
+  "beam_em": 35.9,
+  "beam_img": 62.74111675126903,
+  "early_exit_avg_layers": 2.945811027146128,
+  "best_epoch": 10,
+  "seed": 42,
+  "experiment": "robust",
+  "font_img_known": 48.80952380952381,
+  "font_img_unseen": 39.954337899543376
+ },
+ "max_gen_len": 250
+}

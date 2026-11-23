@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MERLIN · Image to LaTeX</title>
+<meta name="description" content="Convert an image of a mathematical formula into LaTeX code – master's thesis, Faculty of Sciences and Mathematics, University of Niš">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231F4E8C'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='serif'>∑</text></svg>">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>MERLIN · Image to LaTeX</h1>
+    <p>Paste a screenshot of a formula: the model reads it and returns LaTeX code you can edit right away.</p>
+  </div>
+  <div class="status" id="status" role="status">Loading model…</div>
+</header>
+
+<main class="workspace">
+  <section class="panel input-panel" aria-labelledby="in-title">
+    <h2 id="in-title">Formula</h2>
+    <div class="drop" id="drop" tabindex="0" role="button" aria-describedby="drop-hint">
+      <div class="drop-empty" id="dropEmpty">
+        <p class="drop-main">Paste a screenshot (<kbd>Ctrl</kbd> + <kbd>V</kbd>) or drop an image here</p>
+        <p class="drop-sub" id="drop-hint">or <label class="link" for="file">choose a file</label> (PNG, JPG or WebP, up to 8 MB)</p>
+        <input type="file" id="file" accept="image/*" hidden>
+      </div>
+      <div class="view" id="view" hidden>
+        <div class="stage" id="stage">
+          <img id="modelImg" alt="The formula as the model sees it">
+          <canvas id="overlay" aria-hidden="true"></canvas>
+        </div>
+        <p class="stage-caption" id="stageCaption">The grid shows the regions the model looks at. Hover over a token below to see where the model looked.</p>
+      </div>
+      <div class="busy" id="busy" hidden><span class="spinner" aria-hidden="true"></span>Reading the formula…</div>
+    </div>
+
+    <div class="examples">
+      <span>Examples:</span>
+      <button class="chip-btn" data-example="/static/examples/example1.png">fractions</button>
+      <button class="chip-btn" data-example="/static/examples/example2.png">square root</button>
+      <button class="chip-btn" data-example="/static/examples/example3.png">subscripts</button>
+      <button class="chip-btn" data-example="/static/examples/example4.png">sum</button>
+    </div>
+
+    <fieldset class="options">
+      <legend class="sr-only">Decoding mode</legend>
+      <div class="seg" role="radiogroup" aria-label="Decoding mode">
+        <label><input type="radio" name="mode" value="greedy" checked><span>Fast</span></label>
+        <label><input type="radio" name="mode" value="beam"><span>Accurate (beam search)</span></label>
+      </div>
+      <label class="toggle"><input type="checkbox" id="earlyExit"><span>Early exit (experimental)</span></label>
+      <button class="ghost" id="rerun" disabled>Read again</button>
+    </fieldset>
+
+    <div class="tokens-wrap" id="tokensWrap" hidden>
+      <div class="tokens-head">
+        <h3>Tokens and model confidence</h3>
+        <div class="legend"><span class="sw sure"></span>confident <span class="sw mid"></span>partly <span class="sw unsure"></span>unsure</div>
+      </div>
+      <div class="tokens" id="tokens" role="list"></div>
+      <p class="token-detail" id="tokenDetail">All tokens: total attention is shown.</p>
+    </div>
+  </section>
+
+  <section class="panel output-panel" aria-labelledby="out-title">
+    <div class="out-head">
+      <h2 id="out-title">LaTeX</h2>
+      <button class="ghost small" id="resetBtn" disabled title="Restore the code the model proposed">Restore model output</button>
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder="LaTeX code will appear here. You can also type it yourself." aria-label="LaTeX code"></textarea>
+    <div class="warn" id="warn" hidden></div>
+    <h3 class="preview-title">Preview</h3>
+    <div class="preview" id="preview" aria-live="polite"><span class="muted">The rendered formula will appear here.</span></div>
+    <div class="copy-row">
+      <button class="primary" data-copy="raw">Copy LaTeX</button>
+      <button class="ghost" data-copy="inline">Copy as $…$</button>
+      <button class="ghost" data-copy="display">Copy as \[…\]</button>
+      <span class="copied" id="copied" role="status"></span>
+    </div>
+    <dl class="stats" id="stats" hidden></dl>
+  </section>
+</main>
+
+<section class="about" aria-labelledby="about-title">
+  <h2 id="about-title">How the model reads a formula</h2>
+  <div class="about-grid">
+    <p>The image is resized to a height of 96 pixels without squeezing its width and split into a grid of 16×16-pixel regions. A DenseNet-121 convolutional network describes every region, and a four-layer GRU decoder writes the LaTeX code token by token.</p>
+    <p>For every token the decoder chooses which regions to attend to and remembers what it has already read (coverage), so it does not return to the same part of the formula. The colour of a token shows how confident the model was.</p>
+    <p><em>Accurate</em> mode keeps three candidates at once and picks the most likely one. <em>Early exit</em> is experimental: it skips the upper decoder layers when the model is confident, but in this version it sharply reduces accuracy, so it is off by default.</p>
+  </div>
+  <dl class="metrics" id="metrics"></dl>
+  <p class="foot">Master's thesis by Nemanja Ignjatović, Faculty of Sciences and Mathematics, University of Niš; supervisor Prof. Marko Miladinović.</p>
+</section>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
