@@ -106,8 +106,8 @@ The trained robust model (≈ 52 MB) is included in `web/model/`, so the app wor
 ### Option A – Docker (recommended)
 
 ```bash
-git clone https://github.com/nemanjaignjatovic02-prog/merlin-latex-ocr.git
-cd merlin-latex-ocr/web
+git clone https://github.com/nemanjaignjatovic02-prog/merlin_latex_ocr.git
+cd merlin_latex_ocr/web
 docker build -t merlin .
 docker run --rm -p 7860:7860 merlin
 ```
@@ -119,7 +119,7 @@ Open <http://localhost:7860>.
 Python 3.10–3.12 is recommended.
 
 ```bash
-cd merlin-latex-ocr/web
+cd merlin_latex_ocr/web
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
