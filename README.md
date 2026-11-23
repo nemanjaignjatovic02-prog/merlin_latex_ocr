@@ -106,7 +106,7 @@ The trained robust model (≈ 52 MB) is included in `web/model/`, so the app wor
 ### Option A – Docker (recommended)
 
 ```bash
-git clone https://github.com/<your-username>/merlin-latex-ocr.git
+git clone https://github.com/nemanjaignjatovic02-prog/merlin-latex-ocr.git
 cd merlin-latex-ocr/web
 docker build -t merlin .
 docker run --rm -p 7860:7860 merlin
